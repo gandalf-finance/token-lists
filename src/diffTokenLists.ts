@@ -36,8 +36,8 @@ export interface TokenListDiff {
   /**
    * The token info that changed
    */
-  readonly changed: {
-    [chainId: number | string]: {
+  changed: {
+    [chainId in TokenInfo['chainId']]: {
       [address: string]: TokenInfoChanges;
     };
   };
@@ -52,9 +52,11 @@ export function diffTokenLists(
   base: TokenInfo[],
   update: TokenInfo[]
 ): TokenListDiff {
-  const indexedBase = base.reduce<{
-    [chainId: number | string]: { [address: string]: TokenInfo };
-  }>((memo, tokenInfo) => {
+  const indexedBase = base.reduce<
+    {
+      [chainId in TokenInfo['chainId']]: { [address: string]: TokenInfo };
+    }
+  >((memo, tokenInfo) => {
     if (!memo[tokenInfo.chainId]) memo[tokenInfo.chainId] = {};
     memo[tokenInfo.chainId][tokenInfo.address] = tokenInfo;
     return memo;
@@ -63,12 +65,12 @@ export function diffTokenLists(
   const newListUpdates = update.reduce<{
     added: TokenInfo[];
     changed: {
-      [chainId: number | string]: {
+      [chainId in TokenInfo['chainId']]: {
         [address: string]: TokenInfoChanges;
       };
     };
     index: {
-      [chainId: number | string]: {
+      [chainId in TokenInfo['chainId']]: {
         [address: string]: true;
       };
     };
@@ -82,7 +84,7 @@ export function diffTokenLists(
           .filter(
             (s): s is TokenInfoChangeKey => s !== 'address' && s !== 'chainId'
           )
-          .filter((s) => {
+          .filter(s => {
             return !compareTokenInfoProperty(tokenInfo[s], baseToken[s]);
           });
         if (changes.length > 0) {
